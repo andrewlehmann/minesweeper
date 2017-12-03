@@ -103,21 +103,21 @@ export class Board extends Component {
     });
   }
 
-  mine(row, col) {
+  sweepSquare(row, col) {
     const squares = this.state.squares.slice();
     if (squares[row][col].status === SquareStatus.EMPTY) {
       squares[row][col].status = SquareStatus.MINED;
       this.setState({
         squares: squares
-      }); // this might be in the wrong place
+      });
 
       if (!this.isAdjacent(row, col) && !this.containsMine(row, col)) {
-        this.mineNeighbors(row, col);
+        this.sweepNeighbors(row, col);
       }
     }
   }
 
-  mineNeighbors(row, col) {
+  sweepNeighbors(row, col) {
     console.log("mine neighbors");
     for (let i = row - 1; i <= row + 1; i++) {
       for (let j = col - 1; j <= col + 1; j++) {
@@ -127,7 +127,7 @@ export class Board extends Component {
           i < this.props.gridSize &&
           j < this.props.gridSize
         )
-          this.mine(i, j);
+          this.sweepSquare(i, j);
       }
     }
   }
@@ -141,7 +141,7 @@ export class Board extends Component {
             square => square.x === row && square.y === col
           ).length > 0
         }
-        onClick={() => this.mine(row, col)}
+        onClick={() => this.sweepSquare(row, col)}
         onContextMenu={e => this.flag(row, col)}
         status={this.state.squares[row][col].status}
       />
