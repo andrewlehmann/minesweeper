@@ -3,11 +3,6 @@ import React, { Component } from "react";
 import { Board } from "./Board";
 
 export class Game extends Component {
-  constructor() {
-    super();
-    this.createMineLocations = this.createMineLocations.bind(this);
-  }
-
   createMineLocations(numOfMines) {
     let mineLocations = [];
 
@@ -25,7 +20,7 @@ export class Game extends Component {
     return (
       <div className="game">
         <div className="game-board">
-          <Board size={10} mineLocations={this.createMineLocations(10)} />
+          <Board gridSize={10} mineLocations={this.createMineLocations(10)} />
         </div>
         <div className="game-info" />
       </div>

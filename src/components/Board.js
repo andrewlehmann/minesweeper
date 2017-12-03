@@ -7,12 +7,18 @@ const SquareStatus = {
   FLAGGED: 2
 };
 
+const GameStatus = {
+  INPROGRESS: 0,
+  WON: 1,
+  LOST: 2
+};
+
 export class Board extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      squares: this.initSquares(props.size)
+      squares: this.initSquares(props.gridSize)
     };
   }
 
@@ -23,9 +29,9 @@ export class Board extends Component {
         if (
           i >= 0 &&
           j >= 0 &&
-          i < this.props.size &&
-          j < this.props.size &&
-          this.state.squares[i][j]
+          i < this.props.gridSize &&
+          j < this.props.gridSize &&
+          this.containsMine(i, j)
         )
           counter++;
       }
@@ -33,48 +39,82 @@ export class Board extends Component {
     return counter;
   }
 
+  containsMine(row, col) {
+    return (
+      this.props.mineLocations.filter(
+        square => square.x === row && square.y === col
+      ).length > 0
+    );
+  }
+
   initSquares(size) {
     const squares = [];
     for (let i = 0; i < size; i++) {
-      squares[i] = Array(size).fill().map(e => ({
-        status: SquareStatus.EMPTY
-      }));
+      squares[i] = Array(size)
+        .fill()
+        .map(e => ({
+          status: SquareStatus.EMPTY
+        }));
     }
     return squares;
   }
 
   isAdjacent(row, col) {
-    if (!this.state.squares[row][col].status === SquareStatus.MINED) {
-      for(let i = row - 1; i <= row + 1; i++) {
-        for(let j = col - 1; j <= col + 1; j++)
-          if (this.state.squares[i][j].status === SquareStatus.MINED)
+    console.log("testing isAdj");
+    if (!this.containsMine(row, col)) {
+      for (let i = row - 1; i <= row + 1; i++) {
+        for (let j = col - 1; j <= col + 1; j++)
+          if (
+            i >= 0 &&
+            j >= 0 &&
+            i < this.props.gridSize &&
+            j < this.props.gridSize &&
+            this.containsMine(i, j)
+          )
             return true;
       }
     }
     return false;
   }
 
+  flag(row, col) {
+    const squares = this.state.squares.slice();
+    if (squares[row][col].status === SquareStatus.EMPTY)
+      squares[row][col].status = SquareStatus.FLAGGED;
+    else if (squares[row][col].status === SquareStatus.FLAGGED)
+      squares[row][col].status = SquareStatus.EMPTY;
+
+    this.setState({
+      squares: squares
+    });
+  }
+
   mine(row, col) {
     const squares = this.state.squares.slice();
-    if(squares[row][col].status === SquareStatus.EMPTY) {
+    if (squares[row][col].status === SquareStatus.EMPTY) {
       squares[row][col].status = SquareStatus.MINED;
       this.setState({
         squares: squares
-      });
+      }); // this might be in the wrong place
 
-      if(!this.isAdjacent(row, col) && !squares[row][col].status == SquareStatus.MINED) {
-        //mineNeighbors(row, col);
+      if (!this.isAdjacent(row, col) && !this.containsMine(row, col)) {
+        this.mineNeighbors(row, col);
       }
     }
   }
 
-  flag(row, col) {
-    const squares = this.state.squares.slice();
-    if(squares[row][col].status === SquareStatus.EMPTY) {
-      squares[row][col].status = SquareStatus.FLAGGED;
-      this.setState({
-        squares: squares
-      });
+  mineNeighbors(row, col) {
+    console.log("mine neighbors");
+    for (let i = row - 1; i <= row + 1; i++) {
+      for (let j = col - 1; j <= col + 1; j++) {
+        if (
+          i >= 0 &&
+          j >= 0 &&
+          i < this.props.gridSize &&
+          j < this.props.gridSize
+        )
+          this.mine(i, j);
+      }
     }
   }
 
@@ -119,7 +159,6 @@ export class Board extends Component {
   }
 
   render() {
-    return this.renderBoard(this.props.size);
+    return this.renderBoard(this.props.gridSize);
   }
 }
-
