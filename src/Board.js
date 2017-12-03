@@ -3,16 +3,32 @@ import { Square } from './Square';
 
 export class Board extends Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.renderSquare = this.renderSquare.bind(this);
         this.renderRow = this.renderRow.bind(this);
         this.renderBoard = this.renderBoard.bind(this);
+        this.createMineLocations = this.createMineLocations.bind(this);
+        
+        this.mineLocations = this.createMineLocations(props.size);
+    }
 
+    createMineLocations(numOfMines) {
+        let mineLocations = [];
+
+        for(let i = 0; i < numOfMines; i++) {
+            mineLocations.push(Math.floor(Math.random() * 100));
+        }
+        
+        return mineLocations;
+        
     }
 
     renderSquare(status) {
-        return <Square status={status} />;
+        if (this.mineLocations.includes(status)) {
+            return <Square status={status} hasMine={true} />;
+        }
+        return <Square status={status} hasMine={false} />;
     }
 
     renderRow(length, rowNum) {
@@ -45,6 +61,6 @@ export class Board extends Component {
 
     
     render() {
-        return(this.renderBoard(15));
+        return(this.renderBoard(this.props.size));
     }
 }
