@@ -1,12 +1,18 @@
 import React, { Component } from "react";
 import { Square } from "./Square";
 
+const SquareStatus = {
+  EMPTY: 0,
+  MINED: 1,
+  FLAGGED: 2
+};
+
 export class Board extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      squares: this.initSquares(props.size, false)
+      squares: this.initSquares(props.size)
     };
   }
 
@@ -27,20 +33,49 @@ export class Board extends Component {
     return counter;
   }
 
-  initSquares(size, contents) {
+  initSquares(size) {
     const squares = [];
     for (let i = 0; i < size; i++) {
-      squares[i] = Array(size).fill(contents);
+      squares[i] = Array(size).fill().map(e => ({
+        status: SquareStatus.EMPTY
+      }));
     }
     return squares;
   }
 
-  mine(x, y) {
+  isAdjacent(row, col) {
+    if (!this.state.squares[row][col].status === SquareStatus.MINED) {
+      for(let i = row - 1; i <= row + 1; i++) {
+        for(let j = col - 1; j <= col + 1; j++)
+          if (this.state.squares[i][j].status === SquareStatus.MINED)
+            return true;
+      }
+    }
+    return false;
+  }
+
+  mine(row, col) {
     const squares = this.state.squares.slice();
-    squares[x][y] = true;
-    this.setState({
-      squares: squares
-    });
+    if(squares[row][col].status === SquareStatus.EMPTY) {
+      squares[row][col].status = SquareStatus.MINED;
+      this.setState({
+        squares: squares
+      });
+
+      if(!this.isAdjacent(row, col) && !squares[row][col].status == SquareStatus.MINED) {
+        //mineNeighbors(row, col);
+      }
+    }
+  }
+
+  flag(row, col) {
+    const squares = this.state.squares.slice();
+    if(squares[row][col].status === SquareStatus.EMPTY) {
+      squares[row][col].status = SquareStatus.FLAGGED;
+      this.setState({
+        squares: squares
+      });
+    }
   }
 
   renderSquare(row, col, length) {
@@ -53,7 +88,8 @@ export class Board extends Component {
           ).length > 0
         }
         onClick={() => this.mine(row, col)}
-        isMined={this.state.squares[row][col]}
+        onContextMenu={e => this.flag(row, col)}
+        status={this.state.squares[row][col].status}
       />
     );
   }
@@ -86,3 +122,4 @@ export class Board extends Component {
     return this.renderBoard(this.props.size);
   }
 }
+
