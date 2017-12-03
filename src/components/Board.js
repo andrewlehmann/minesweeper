@@ -74,7 +74,6 @@ export class Board extends Component {
   }
 
   isAdjacent(row, col) {
-    console.log("testing isAdj");
     if (!this.containsMine(row, col)) {
       for (let i = row - 1; i <= row + 1; i++) {
         for (let j = col - 1; j <= col + 1; j++)
@@ -118,7 +117,6 @@ export class Board extends Component {
   }
 
   sweepNeighbors(row, col) {
-    console.log("mine neighbors");
     for (let i = row - 1; i <= row + 1; i++) {
       for (let j = col - 1; j <= col + 1; j++) {
         if (
