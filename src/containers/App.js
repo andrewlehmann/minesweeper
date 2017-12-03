@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Game } from './Game';
+import { Game } from '../components/Game';
 import './App.css';
 
 class App extends Component {
@@ -13,7 +13,7 @@ class App extends Component {
 
 
 ReactDOM.render(
-  <Game />,
+  <App />,
   document.getElementById('root')
 );
 
