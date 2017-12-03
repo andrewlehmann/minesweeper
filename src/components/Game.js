@@ -12,7 +12,10 @@ export class Game extends Component {
     let mineLocations = [];
 
     for (let i = 0; i < numOfMines; i++) {
-      mineLocations.push({x: Math.floor(Math.random() * 10), y: Math.floor(Math.random() * 10)});
+      mineLocations.push({
+        x: Math.floor(Math.random() * 10),
+        y: Math.floor(Math.random() * 10)
+      });
     }
 
     return mineLocations;

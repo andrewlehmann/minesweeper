@@ -4,19 +4,33 @@ import { Square } from "./Square";
 export class Board extends Component {
   constructor(props) {
     super(props);
-    this.renderSquare = this.renderSquare.bind(this);
-    this.renderRow = this.renderRow.bind(this);
-    this.renderBoard = this.renderBoard.bind(this);
 
     this.state = {
-      squares: this.initSquares(props.size)
+      squares: this.initSquares(props.size, false)
     };
   }
 
-  initSquares(size) {
+  calculateAdjacentMines(row, col) {
+    let counter = 0;
+    for (let i = row - 1; i <= row + 1; i++) {
+      for (let j = col - 1; j <= col + 1; j++) {
+        if (
+          i >= 0 &&
+          j >= 0 &&
+          i < this.props.size &&
+          j < this.props.size &&
+          this.state.squares[i][j]
+        )
+          counter++;
+      }
+    }
+    return counter;
+  }
+
+  initSquares(size, contents) {
     const squares = [];
     for (let i = 0; i < size; i++) {
-      squares[i] = Array(size).fill(false);
+      squares[i] = Array(size).fill(contents);
     }
     return squares;
   }
@@ -24,16 +38,22 @@ export class Board extends Component {
   mine(x, y) {
     const squares = this.state.squares.slice();
     squares[x][y] = true;
-    this.setState({ squares: squares });
+    this.setState({
+      squares: squares
+    });
   }
 
-  renderSquare(i, j, length) {
+  renderSquare(row, col, length) {
     return (
       <Square
-        key={length * i + j}
-        hasMine={this.props.mineLocations.filter(square => square.x === i && square.y === j).length > 0}
-        onClick={() => this.mine(i, j)}
-        isMined={this.state.squares[i][j]}
+        key={length * row + col}
+        hasMine={
+          this.props.mineLocations.filter(
+            square => square.x === row && square.y === col
+          ).length > 0
+        }
+        onClick={() => this.mine(row, col)}
+        isMined={this.state.squares[row][col]}
       />
     );
   }
@@ -52,14 +72,14 @@ export class Board extends Component {
     );
   }
 
-  renderBoard(size) {
+  renderBoard(gridSize) {
     let board = [];
 
-    for (let i = 0; i < size; i++) {
-      board.push(this.renderRow(size, i));
+    for (let i = 0; i < gridSize; i++) {
+      board.push(this.renderRow(gridSize, i));
     }
 
-    return <div className="board">{board}</div>;
+    return <div className="board"> {board} </div>;
   }
 
   render() {
