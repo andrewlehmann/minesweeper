@@ -3,7 +3,7 @@ import { Square } from "./Square";
 
 const SquareStatus = {
   EMPTY: 0,
-  MINED: 1,
+  SWEPT: 1,
   FLAGGED: 2
 };
 
@@ -55,9 +55,10 @@ export class Board extends Component {
 
   containsMine(row, col) {
     return (
-      this.state.mineLocations.filter(
-        square => square.x === row && square.y === col
-      ).length > 0
+      this.state.mineLocations
+                .filter(square => square.x === row)
+                .filter(square => square.y === col)
+                .length > 0
     );
   }
 
@@ -105,7 +106,7 @@ export class Board extends Component {
   sweepSquare(row, col) {
     const squares = this.state.squares.slice();
     if (squares[row][col].status === SquareStatus.EMPTY) {
-      squares[row][col].status = SquareStatus.MINED;
+      squares[row][col].status = SquareStatus.SWEPT;
       this.setState({
         squares: squares
       });
@@ -134,11 +135,6 @@ export class Board extends Component {
     return (
       <Square
         key={length * row + col}
-        hasMine={
-          this.state.mineLocations.filter(
-            square => square.x === row && square.y === col
-          ).length > 0
-        }
         onClick={() => this.sweepSquare(row, col)}
         onContextMenu={e => this.flag(row, col)}
         status={this.state.squares[row][col].status}
