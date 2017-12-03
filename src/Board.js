@@ -8,27 +8,14 @@ export class Board extends Component {
         this.renderSquare = this.renderSquare.bind(this);
         this.renderRow = this.renderRow.bind(this);
         this.renderBoard = this.renderBoard.bind(this);
-        this.createMineLocations = this.createMineLocations.bind(this);
-        
-        this.mineLocations = this.createMineLocations(props.size);
-    }
-
-    createMineLocations(numOfMines) {
-        let mineLocations = [];
-
-        for(let i = 0; i < numOfMines; i++) {
-            mineLocations.push(Math.floor(Math.random() * 100));
-        }
-        
-        return mineLocations;
         
     }
 
-    renderSquare(status) {
-        if (this.mineLocations.includes(status)) {
-            return <Square status={status} hasMine={true} />;
+    renderSquare(index) {
+        if (this.props.mineLocations.includes(index)) {
+            return <Square index={index} hasMine={true} />;
         }
-        return <Square status={status} hasMine={false} />;
+        return <Square index={index} hasMine={false} />;
     }
 
     renderRow(length, rowNum) {
