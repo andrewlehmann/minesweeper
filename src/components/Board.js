@@ -18,8 +18,22 @@ export class Board extends Component {
     super(props);
 
     this.state = {
-      squares: this.initSquares(props.gridSize)
+      squares: this.initSquares(props.gridSize),
+      mineLocations: this.createMineLocations(props.gridSize)
     };
+  }
+
+  createMineLocations(numOfMines) {
+    const mineLocations = [];
+
+    for (let i = 0; i < numOfMines; i++) {
+      mineLocations.push({
+        x: Math.floor(Math.random() * 10),
+        y: Math.floor(Math.random() * 10)
+      });
+    }
+
+    return mineLocations;
   }
 
   calculateAdjacentMines(row, col) {
@@ -41,7 +55,7 @@ export class Board extends Component {
 
   containsMine(row, col) {
     return (
-      this.props.mineLocations.filter(
+      this.state.mineLocations.filter(
         square => square.x === row && square.y === col
       ).length > 0
     );
@@ -123,7 +137,7 @@ export class Board extends Component {
       <Square
         key={length * row + col}
         hasMine={
-          this.props.mineLocations.filter(
+          this.state.mineLocations.filter(
             square => square.x === row && square.y === col
           ).length > 0
         }
