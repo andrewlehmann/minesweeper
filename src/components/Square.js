@@ -1,21 +1,10 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-
-export class Square extends Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      isMined: false
-    }
-  }
-
-  render() {
+export function Square(props) {
     return(
-      <button className="square">
-        { this.props.hasMine.toString() }
+      <button className="square" onClick={() => props.onClick()}>
+        {props.isMined.toString()}
       </button>
     );
-  }
 }
 
