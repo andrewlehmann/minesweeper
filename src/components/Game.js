@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Board } from "./Board";
 import { GameInfo } from "./GameInfo";
-import { Button } from "react-bootstrap";
 
 const centered = { display: "flex", justifyContent: "center" };
 
