@@ -6,13 +6,12 @@ import "./App.css";
 class App extends Component {
   render() {
     return (
-      <Game />
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Game />
+      </div>
     );
   }
 }
-ReactDOM.render(
-  <App />,
-  document.getElementById("root")
-);
+ReactDOM.render(<App />, document.getElementById("root"));
 
 export default App;
