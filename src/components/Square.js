@@ -1,6 +1,5 @@
 import React from "react";
 import { Button } from "react-bootstrap";
-import "./Square.css";
 
 export function Square(props) {
   return (
@@ -13,7 +12,14 @@ export function Square(props) {
         e.preventDefault();
         props.onContextMenu();
       }}
-      style={props.style}
+      style={{
+        borderRadius: "1px",
+        fontWeight: "bold",
+        minWidth: "50px",
+        minHeight: "50px",
+        backgroundColor: props.bgColor,
+        color: props.color
+      }}
     >
       {props.value}
     </Button>

@@ -15,12 +15,12 @@ const GameStatus = {
 };
 
 const AdjacentMinesTextColors = {
-  ZERO: "#9fabb7",
-  ONE: "#1e90ff",
-  TWO: "##228b22",
-  THREE: "#c71585", 
-  FOUR: "#800000",
-  MORE: "#7b68ee"
+  ZERO: "#E0F2E9",
+  ONE: "#0C6291",
+  TWO: "#419141",
+  THREE: "#9A031E", 
+  FOUR: "#002642",
+  MORE: "#3D348B"
 };
 
 export class Board extends Component {
@@ -120,15 +120,9 @@ export class Board extends Component {
         .fill()
         .map(e => ({ 
           status: SquareStatus.NOT_SWEPT, 
-          value: "-",
-          color: "white",
-          style: {
-            borderRadius: "1px",
-            minWidth: "50px",
-            minHeight: "50px",
-            backgroundColor: "slategrey",
-            color: "white"
-          }
+          value: "",
+          color: "red",
+          bgColor: "lightgrey"
         }));
     }
     return squares;
@@ -157,14 +151,17 @@ export class Board extends Component {
 
   flag(row, col) {
     const squares = this.state.squares.slice();
+    const square = squares[row][col];
 
     if (this.checkStatus(row, col, SquareStatus.NOT_SWEPT)) {
-      squares[row][col].status = SquareStatus.FLAGGED;
-      squares[row][col].value = "|>";
+      square.status = SquareStatus.FLAGGED;
+      square.value = "|>";
     } else if (this.checkStatus(row, col, SquareStatus.FLAGGED)) {
-      squares[row][col].status = SquareStatus.NOT_SWEPT;
-      squares[row][col].value = "-";
+      square.status = SquareStatus.NOT_SWEPT;
+      square.value = "-";
     }
+
+    squares[row][col] = square;
 
     this.setState({ squares: squares });
   }
@@ -175,9 +172,9 @@ export class Board extends Component {
     if (squares[row][col].status === SquareStatus.NOT_SWEPT) {
       squares[row][col].status = SquareStatus.SWEPT;
       squares[row][col].value = this.calculateAdjacentMines(row, col);
-
+      squares[row][col].color = this.updateColor(row, col);
+      squares[row][col].bgColor = "#9999";
       this.setState({ squares: squares });
-
       if (!this.isAdjacent(row, col) && !this.containsMine(row, col)) {
         this.sweepNeighbors(row, col);
       }
@@ -197,23 +194,13 @@ export class Board extends Component {
     const squares = this.state.squares.slice();
 
     switch(squares[row][col].value) {
-    case "*":
-      squares[row][col].style.color = "crimson"; break;
-    case "1":
-      squares[row][col].style.color = AdjacentMinesTextColors.ONE; break;
-    case "2":
-      squares[row][col].style.color = AdjacentMinesTextColors.TWO; break;
-    case "3":
-      squares[row][col].style.color = AdjacentMinesTextColors.THREE; break;
-    case "4":
-      squares[row][col].style.color = AdjacentMinesTextColors.FOUR; break;
-    default: 
-      squares[row][col].style.color = AdjacentMinesTextColors.OTHER;
+    case "*": return "crimson";
+    case 1: return AdjacentMinesTextColors.ONE;
+    case 2: return AdjacentMinesTextColors.TWO;
+    case 3: return AdjacentMinesTextColors.THREE;
+    case 4: return AdjacentMinesTextColors.FOUR;
+    default: return AdjacentMinesTextColors.OTHER;
     }
-
-    this.setState({
-      squares: squares
-    });
   }
 
   renderSquare(row, col, length) {
@@ -221,6 +208,8 @@ export class Board extends Component {
 
     return (
       <Square
+        bgColor={square.bgColor}
+        color = {square.color}
         key={length * row + col}
         onClick={() => this.sweepSquare(row, col)}
         onContextMenu={e => this.flag(row, col)}
@@ -239,9 +228,9 @@ export class Board extends Component {
     }
 
     return (
-      <ButtonGroup vertical className="board-row" key={rowNum}>
+      <div className="board-row" key={rowNum}>
         {row}
-      </ButtonGroup>
+      </div>
     );
   }
 
