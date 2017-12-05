@@ -70,9 +70,10 @@ export class Board extends Component {
 
   containsMine(row, col) {
     return (
-      this.MINE_LOCATIONS.filter(square => square.x === row).filter(
-        square => square.y === col
-      ).length > 0
+      this.MINE_LOCATIONS
+        .filter(square => square.x === row)
+        .filter(square => square.y === col)
+        .length > 0
     );
   }
 
