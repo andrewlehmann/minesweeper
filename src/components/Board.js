@@ -28,7 +28,16 @@ export class Board extends Component {
 
     this.GRIDSIZE = props.gridSize;
     this.MINE_LOCATIONS = this.createMineLocations(this.GRIDSIZE);
-    this.state = {
+    this.reset = this.reset.bind(this);
+    this.state = this.getInitialState();
+  }
+
+  reset() {
+    this.setState(this.getInitialState());
+  }
+
+  getInitialState() {
+    return {
       squares: this.initSquares(this.GRIDSIZE)
     };
   }
