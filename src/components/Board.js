@@ -33,6 +33,22 @@ export class Board extends Component {
     };
   }
 
+  initSquares(size) {
+    const squares = [];
+
+    for (let i = 0; i < size; i++) {
+      squares[i] = Array(size)
+        .fill()
+        .map(e => ({
+          status: SquareStatus.NOT_SWEPT,
+          value: "",
+          color: "red",
+          bgColor: "lightgrey"
+        }));
+    }
+    return squares;
+  }
+
   createMineLocations(numOfMines) {
     let mineLocations = [];
     let numPlaced = 0;
@@ -52,34 +68,20 @@ export class Board extends Component {
     return mineLocations;
   }
 
-  calculateAdjacentMines(row, col) {
-    let counter = 0;
-    for (let i = row - 1; i <= row + 1; i++) {
-      for (let j = col - 1; j <= col + 1; j++) {
-        if (
-          i >= 0 &&
-          j >= 0 &&
-          i < this.GRIDSIZE &&
-          j < this.GRIDSIZE &&
-          this.containsMine(i, j)
-        )
-          counter++;
-      }
-    }
-    if (this.containsMine(row, col)) {
-      return "*";
-    } else if (counter === 0) {
-      return " ";
-    }
-    return counter;
-  }
-
   containsMine(row, col) {
     return (
       this.MINE_LOCATIONS.filter(square => square.x === row).filter(
         square => square.y === col
       ).length > 0
     );
+  }
+
+  showMines() {
+    const squares = this.state.squares.slice();
+    this.MINE_LOCATIONS.forEach(e => squares[e.x][e.y].value = "*");
+    this.setState({
+      squares: squares
+    });
   }
 
   getCurrentGameStatus() {
@@ -109,20 +111,12 @@ export class Board extends Component {
     return this.state.squares[row][col].status === status;
   }
 
-  initSquares(size) {
-    const squares = [];
-
-    for (let i = 0; i < size; i++) {
-      squares[i] = Array(size)
-        .fill()
-        .map(e => ({
-          status: SquareStatus.NOT_SWEPT,
-          value: "",
-          color: "red",
-          bgColor: "lightgrey"
-        }));
+  checkForGameEnd() {
+    let status = this.getCurrentGameStatus();
+    if (status === GameStatus.LOST) {
+      this.showMines();
+      console.log("game over");
     }
-    return squares;
   }
 
   isAdjacent(row, col) {
@@ -142,8 +136,6 @@ export class Board extends Component {
     return false;
   }
 
-  disableSquare(row, col) {}
-
   flag(row, col) {
     const squares = this.state.squares.slice();
     const square = squares[row][col];
@@ -153,26 +145,30 @@ export class Board extends Component {
       square.value = "|>";
     } else if (this.checkStatus(row, col, SquareStatus.FLAGGED)) {
       square.status = SquareStatus.NOT_SWEPT;
-      square.value = "-";
+      square.value = " ";
     }
 
     squares[row][col] = square;
 
     this.setState({ squares: squares });
+    this.checkForGameEnd();
   }
 
   sweepSquare(row, col) {
     const squares = this.state.squares.slice();
+    const square = squares[row][col];
 
-    if (squares[row][col].status === SquareStatus.NOT_SWEPT) {
-      squares[row][col].status = SquareStatus.SWEPT;
-      squares[row][col].value = this.calculateAdjacentMines(row, col);
-      squares[row][col].color = this.updateColor(row, col);
-      squares[row][col].bgColor = "#9999";
+    if (square.status === SquareStatus.NOT_SWEPT) {
+      square.status = SquareStatus.SWEPT;
+      square.value = this.calculateAdjacentMines(row, col);
+      square.color = this.getColor(row, col);
+      square.bgColor = "#9999";
+      squares[row][col] = square;
       this.setState({ squares: squares });
       if (!this.isAdjacent(row, col) && !this.containsMine(row, col)) {
         this.sweepNeighbors(row, col);
       }
+      this.checkForGameEnd();
     }
   }
 
@@ -185,23 +181,45 @@ export class Board extends Component {
     }
   }
 
-  updateColor(row, col) {
+  getColor(row, col) {
     const squares = this.state.squares.slice();
 
     switch (squares[row][col].value) {
-    case "*":
-      return "crimson";
-    case 1:
-      return AdjacentMinesTextColors.ONE;
-    case 2:
-      return AdjacentMinesTextColors.TWO;
-    case 3:
-      return AdjacentMinesTextColors.THREE;
-    case 4:
-      return AdjacentMinesTextColors.FOUR;
-    default:
-      return AdjacentMinesTextColors.OTHER;
+      case "*":
+        return "crimson";
+      case 1:
+        return AdjacentMinesTextColors.ONE;
+      case 2:
+        return AdjacentMinesTextColors.TWO;
+      case 3:
+        return AdjacentMinesTextColors.THREE;
+      case 4:
+        return AdjacentMinesTextColors.FOUR;
+      default:
+        return AdjacentMinesTextColors.OTHER;
     }
+  }
+
+  calculateAdjacentMines(row, col) {
+    let counter = 0;
+    for (let i = row - 1; i <= row + 1; i++) {
+      for (let j = col - 1; j <= col + 1; j++) {
+        if (
+          i >= 0 &&
+          j >= 0 &&
+          i < this.GRIDSIZE &&
+          j < this.GRIDSIZE &&
+          this.containsMine(i, j)
+        )
+          counter++;
+      }
+    }
+    if (this.containsMine(row, col)) {
+      return "*";
+    } else if (counter === 0) {
+      return " ";
+    }
+    return counter;
   }
 
   renderSquare(row, col, length) {

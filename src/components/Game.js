@@ -7,7 +7,7 @@ export class Game extends Component {
     return (
       <div className="game">
         <div className="game-board">
-          <Board gridSize={10} />
+          <Board gridSize={12} />
         </div>
         <div className="game-info" />
       </div>
