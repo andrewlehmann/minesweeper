@@ -8,7 +8,7 @@ const SquareStatus = {
 };
 
 const GameStatus = {
-  INPROGRESS: 0,
+  IN_PROGRESS: 0,
   WON: 1,
   LOST: 2
 };
@@ -115,7 +115,6 @@ export class Board extends Component {
     let status = this.getCurrentGameStatus();
     if (status === GameStatus.LOST) {
       this.showMines();
-      console.log("game over");
     }
   }
 
@@ -185,18 +184,18 @@ export class Board extends Component {
     const squares = this.state.squares.slice();
 
     switch (squares[row][col].value) {
-      case "*":
-        return "crimson";
-      case 1:
-        return AdjacentMinesTextColors.ONE;
-      case 2:
-        return AdjacentMinesTextColors.TWO;
-      case 3:
-        return AdjacentMinesTextColors.THREE;
-      case 4:
-        return AdjacentMinesTextColors.FOUR;
-      default:
-        return AdjacentMinesTextColors.OTHER;
+    case "*":
+      return "crimson";
+    case 1:
+      return AdjacentMinesTextColors.ONE;
+    case 2:
+      return AdjacentMinesTextColors.TWO;
+    case 3:
+      return AdjacentMinesTextColors.THREE;
+    case 4:
+      return AdjacentMinesTextColors.FOUR;
+    default:
+      return AdjacentMinesTextColors.OTHER;
     }
   }
 
