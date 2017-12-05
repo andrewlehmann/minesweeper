@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Square } from "./Square";
+import { ButtonGroup } from "react-bootstrap";
 
 const SquareStatus = {
   NOT_SWEPT: 0,
@@ -13,6 +14,15 @@ const GameStatus = {
   LOST: 2
 };
 
+const AdjacentMinesTextColors = {
+  ZERO: "#9fabb7",
+  ONE: "#1e90ff",
+  TWO: "##228b22",
+  THREE: "#c71585", 
+  FOUR: "#800000",
+  MORE: "#7b68ee"
+};
+
 export class Board extends Component {
   constructor(props) {
     super(props);
@@ -21,19 +31,20 @@ export class Board extends Component {
 
     this.state = {
       squares: this.initSquares(this.GRIDSIZE),
-      mineLocations: this.createMineLocations(this.GRIDSIZE),
+      mineLocations: this.createMineLocations(this.GRIDSIZE)
     };
   }
 
   createMineLocations(numOfMines) {
     let mineLocations = [];
-    //TODO: mines might be put in same location, might break win condition
     let numPlaced = 0;
-    while(numPlaced < numOfMines) {
-      let x = Math.floor(Math.random() * this.GRIDSIZE);
-      let y = Math.floor(Math.random() * this.GRIDSIZE);
 
-      let nextMineLocation = { x: x, y: y };
+    while (numPlaced < numOfMines) {
+      let nextMineLocation = {
+        x: Math.floor(Math.random() * this.GRIDSIZE),
+        y: Math.floor(Math.random() * this.GRIDSIZE)
+      };
+
       if (!mineLocations.includes(nextMineLocation)) {
         mineLocations.push(nextMineLocation);
         numPlaced++;
@@ -59,6 +70,9 @@ export class Board extends Component {
     }
     if (this.containsMine(row, col)) {
       return "*";
+    }
+    else if(counter === 0) {
+      return " ";
     }
     return counter;
   }
@@ -95,7 +109,7 @@ export class Board extends Component {
   }
 
   checkStatus(row, col, status) {
-    return this.state.squares[row][col].stauts === status;
+    return this.state.squares[row][col].status === status;
   }
 
   initSquares(size) {
@@ -104,7 +118,18 @@ export class Board extends Component {
     for (let i = 0; i < size; i++) {
       squares[i] = Array(size)
         .fill()
-        .map(e => ({ status: SquareStatus.NOT_SWEPT, value: "-"}));
+        .map(e => ({ 
+          status: SquareStatus.NOT_SWEPT, 
+          value: "-",
+          color: "white",
+          style: {
+            borderRadius: "1px",
+            minWidth: "50px",
+            minHeight: "50px",
+            backgroundColor: "slategrey",
+            color: "white"
+          }
+        }));
     }
     return squares;
   }
@@ -126,13 +151,19 @@ export class Board extends Component {
     return false;
   }
 
+  disableSquare(row, col) {
+    
+  }
+
   flag(row, col) {
     const squares = this.state.squares.slice();
 
     if (this.checkStatus(row, col, SquareStatus.NOT_SWEPT)) {
       squares[row][col].status = SquareStatus.FLAGGED;
+      squares[row][col].value = "|>";
     } else if (this.checkStatus(row, col, SquareStatus.FLAGGED)) {
       squares[row][col].status = SquareStatus.NOT_SWEPT;
+      squares[row][col].value = "-";
     }
 
     this.setState({ squares: squares });
@@ -162,14 +193,40 @@ export class Board extends Component {
     }
   }
 
+  updateColor(row, col) {
+    const squares = this.state.squares.slice();
+
+    switch(squares[row][col].value) {
+    case "*":
+      squares[row][col].style.color = "crimson"; break;
+    case "1":
+      squares[row][col].style.color = AdjacentMinesTextColors.ONE; break;
+    case "2":
+      squares[row][col].style.color = AdjacentMinesTextColors.TWO; break;
+    case "3":
+      squares[row][col].style.color = AdjacentMinesTextColors.THREE; break;
+    case "4":
+      squares[row][col].style.color = AdjacentMinesTextColors.FOUR; break;
+    default: 
+      squares[row][col].style.color = AdjacentMinesTextColors.OTHER;
+    }
+
+    this.setState({
+      squares: squares
+    });
+  }
+
   renderSquare(row, col, length) {
+    const square = this.state.squares.slice()[row][col];
+
     return (
       <Square
         key={length * row + col}
         onClick={() => this.sweepSquare(row, col)}
         onContextMenu={e => this.flag(row, col)}
-        status={this.state.squares[row][col].status}
-        value={this.state.squares[row][col].value}
+        status={square.status}
+        style={square.style}
+        value={square.value}
       />
     );
   }
@@ -182,9 +239,9 @@ export class Board extends Component {
     }
 
     return (
-      <div className="board-row" key={rowNum}>
+      <ButtonGroup vertical className="board-row" key={rowNum}>
         {row}
-      </div>
+      </ButtonGroup>
     );
   }
 
@@ -201,4 +258,5 @@ export class Board extends Component {
   render() {
     return this.renderBoard(this.GRIDSIZE);
   }
+  
 }
