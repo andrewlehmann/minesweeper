@@ -21,18 +21,23 @@ export class Board extends Component {
 
     this.state = {
       squares: this.initSquares(this.GRIDSIZE),
-      mineLocations: this.createMineLocations(this.GRIDSIZE)
+      mineLocations: this.createMineLocations(this.GRIDSIZE),
     };
   }
 
   createMineLocations(numOfMines) {
-    const mineLocations = [];
+    let mineLocations = [];
     //TODO: mines might be put in same location, might break win condition
-    for (let i = 0; i < numOfMines; i++) {
-      mineLocations.push({
-        x: Math.floor(Math.random() * 10),
-        y: Math.floor(Math.random() * 10)
-      });
+    let numPlaced = 0;
+    while(numPlaced < numOfMines) {
+      let x = Math.floor(Math.random() * this.GRIDSIZE);
+      let y = Math.floor(Math.random() * this.GRIDSIZE);
+
+      let nextMineLocation = { x: x, y: y };
+      if (!mineLocations.includes(nextMineLocation)) {
+        mineLocations.push(nextMineLocation);
+        numPlaced++;
+      }
     }
 
     return mineLocations;
@@ -51,6 +56,9 @@ export class Board extends Component {
         )
           counter++;
       }
+    }
+    if (this.containsMine(row, col)) {
+      return "*";
     }
     return counter;
   }
@@ -96,7 +104,7 @@ export class Board extends Component {
     for (let i = 0; i < size; i++) {
       squares[i] = Array(size)
         .fill()
-        .map(e => ({ status: SquareStatus.NOT_SWEPT, value: "*"}));
+        .map(e => ({ status: SquareStatus.NOT_SWEPT, value: "-"}));
     }
     return squares;
   }

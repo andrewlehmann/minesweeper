@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "eslint-config-react-app": "^2.0.1",
+    "eslint-loader": "^1.9.0",
+    "npm": "^5.5.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-scripts": "0.9.5"
