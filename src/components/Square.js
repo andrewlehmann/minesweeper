@@ -10,7 +10,7 @@ export function Square(props) {
         props.onContextMenu();
       }}
     >
-      {props.status.toString()}
+      {props.value}
     </button>
   );
 }

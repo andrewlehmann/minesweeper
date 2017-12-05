@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Square } from "./Square";
 
 const SquareStatus = {
-  EMPTY: 0,
+  NOT_SWEPT: 0,
   SWEPT: 1,
   FLAGGED: 2
 };
@@ -17,15 +17,17 @@ export class Board extends Component {
   constructor(props) {
     super(props);
 
+    this.GRIDSIZE = props.gridSize;
+
     this.state = {
-      squares: this.initSquares(props.gridSize),
-      mineLocations: this.createMineLocations(props.gridSize)
+      squares: this.initSquares(this.GRIDSIZE),
+      mineLocations: this.createMineLocations(this.GRIDSIZE)
     };
   }
 
   createMineLocations(numOfMines) {
     const mineLocations = [];
-
+    //TODO: mines might be put in same location, might break win condition
     for (let i = 0; i < numOfMines; i++) {
       mineLocations.push({
         x: Math.floor(Math.random() * 10),
@@ -43,8 +45,8 @@ export class Board extends Component {
         if (
           i >= 0 &&
           j >= 0 &&
-          i < this.props.gridSize &&
-          j < this.props.gridSize &&
+          i < this.GRIDSIZE &&
+          j < this.GRIDSIZE &&
           this.containsMine(i, j)
         )
           counter++;
@@ -56,20 +58,45 @@ export class Board extends Component {
   containsMine(row, col) {
     return (
       this.state.mineLocations
-                .filter(square => square.x === row)
-                .filter(square => square.y === col)
-                .length > 0
+        .filter(square => square.x === row)
+        .filter(square => square.y === col).length > 0
     );
+  }
+
+  getCurrentGameStatus() {
+    let flaggedMines = 0;
+    let flaggedNonMines = 0;
+
+    for (let i = 0; i < this.GRIDSIZE; i++) {
+      for (let j = 0; j < this.GRIDSIZE; j++) {
+        if (this.containsMine(i, j)) {
+          if (this.checkStatus(i, j, SquareStatus.SWEPT)) {
+            return GameStatus.LOST;
+          } else if (this.checkStatus(i, j, SquareStatus.FLAGGED)) {
+            flaggedMines++;
+          }
+        } else if (this.checkStatus(i, j, SquareStatus.FLAGGED)) {
+          flaggedNonMines++;
+        }
+      }
+    }
+
+    if (flaggedMines === 10 && flaggedNonMines === 0) return GameStatus.WON;
+
+    return GameStatus.IN_PROGRESS;
+  }
+
+  checkStatus(row, col, status) {
+    return this.state.squares[row][col].stauts === status;
   }
 
   initSquares(size) {
     const squares = [];
+
     for (let i = 0; i < size; i++) {
       squares[i] = Array(size)
         .fill()
-        .map(e => ({
-          status: SquareStatus.EMPTY
-        }));
+        .map(e => ({ status: SquareStatus.NOT_SWEPT, value: "*"}));
     }
     return squares;
   }
@@ -81,8 +108,8 @@ export class Board extends Component {
           if (
             i >= 0 &&
             j >= 0 &&
-            i < this.props.gridSize &&
-            j < this.props.gridSize &&
+            i < this.GRIDSIZE &&
+            j < this.GRIDSIZE &&
             this.containsMine(i, j)
           )
             return true;
@@ -93,23 +120,24 @@ export class Board extends Component {
 
   flag(row, col) {
     const squares = this.state.squares.slice();
-    if (squares[row][col].status === SquareStatus.EMPTY)
-      squares[row][col].status = SquareStatus.FLAGGED;
-    else if (squares[row][col].status === SquareStatus.FLAGGED)
-      squares[row][col].status = SquareStatus.EMPTY;
 
-    this.setState({
-      squares: squares
-    });
+    if (this.checkStatus(row, col, SquareStatus.NOT_SWEPT)) {
+      squares[row][col].status = SquareStatus.FLAGGED;
+    } else if (this.checkStatus(row, col, SquareStatus.FLAGGED)) {
+      squares[row][col].status = SquareStatus.NOT_SWEPT;
+    }
+
+    this.setState({ squares: squares });
   }
 
   sweepSquare(row, col) {
     const squares = this.state.squares.slice();
-    if (squares[row][col].status === SquareStatus.EMPTY) {
+
+    if (squares[row][col].status === SquareStatus.NOT_SWEPT) {
       squares[row][col].status = SquareStatus.SWEPT;
-      this.setState({
-        squares: squares
-      });
+      squares[row][col].value = this.calculateAdjacentMines(row, col);
+
+      this.setState({ squares: squares });
 
       if (!this.isAdjacent(row, col) && !this.containsMine(row, col)) {
         this.sweepNeighbors(row, col);
@@ -120,12 +148,7 @@ export class Board extends Component {
   sweepNeighbors(row, col) {
     for (let i = row - 1; i <= row + 1; i++) {
       for (let j = col - 1; j <= col + 1; j++) {
-        if (
-          i >= 0 &&
-          j >= 0 &&
-          i < this.props.gridSize &&
-          j < this.props.gridSize
-        )
+        if (i >= 0 && j >= 0 && i < this.GRIDSIZE && j < this.GRIDSIZE)
           this.sweepSquare(i, j);
       }
     }
@@ -138,12 +161,13 @@ export class Board extends Component {
         onClick={() => this.sweepSquare(row, col)}
         onContextMenu={e => this.flag(row, col)}
         status={this.state.squares[row][col].status}
+        value={this.state.squares[row][col].value}
       />
     );
   }
 
   renderRow(length, rowNum) {
-    let row = [];
+    const row = [];
 
     for (let i = 0; i < length; i++) {
       row.push(this.renderSquare(rowNum, i, length));
@@ -157,7 +181,7 @@ export class Board extends Component {
   }
 
   renderBoard(gridSize) {
-    let board = [];
+    const board = [];
 
     for (let i = 0; i < gridSize; i++) {
       board.push(this.renderRow(gridSize, i));
@@ -167,6 +191,6 @@ export class Board extends Component {
   }
 
   render() {
-    return this.renderBoard(this.props.gridSize);
+    return this.renderBoard(this.GRIDSIZE);
   }
 }
