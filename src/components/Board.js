@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Square } from "./Square";
-import { ButtonGroup } from "react-bootstrap";
 
 const SquareStatus = {
   NOT_SWEPT: 0,
@@ -18,7 +17,7 @@ const AdjacentMinesTextColors = {
   ZERO: "#E0F2E9",
   ONE: "#0C6291",
   TWO: "#419141",
-  THREE: "#9A031E", 
+  THREE: "#9A031E",
   FOUR: "#002642",
   MORE: "#3D348B"
 };
@@ -28,10 +27,9 @@ export class Board extends Component {
     super(props);
 
     this.GRIDSIZE = props.gridSize;
-
+    this.MINE_LOCATIONS = this.createMineLocations(this.GRIDSIZE);
     this.state = {
-      squares: this.initSquares(this.GRIDSIZE),
-      mineLocations: this.createMineLocations(this.GRIDSIZE)
+      squares: this.initSquares(this.GRIDSIZE)
     };
   }
 
@@ -70,8 +68,7 @@ export class Board extends Component {
     }
     if (this.containsMine(row, col)) {
       return "*";
-    }
-    else if(counter === 0) {
+    } else if (counter === 0) {
       return " ";
     }
     return counter;
@@ -79,9 +76,9 @@ export class Board extends Component {
 
   containsMine(row, col) {
     return (
-      this.state.mineLocations
-        .filter(square => square.x === row)
-        .filter(square => square.y === col).length > 0
+      this.MINE_LOCATIONS.filter(square => square.x === row).filter(
+        square => square.y === col
+      ).length > 0
     );
   }
 
@@ -118,8 +115,8 @@ export class Board extends Component {
     for (let i = 0; i < size; i++) {
       squares[i] = Array(size)
         .fill()
-        .map(e => ({ 
-          status: SquareStatus.NOT_SWEPT, 
+        .map(e => ({
+          status: SquareStatus.NOT_SWEPT,
           value: "",
           color: "red",
           bgColor: "lightgrey"
@@ -145,9 +142,7 @@ export class Board extends Component {
     return false;
   }
 
-  disableSquare(row, col) {
-    
-  }
+  disableSquare(row, col) {}
 
   flag(row, col) {
     const squares = this.state.squares.slice();
@@ -193,13 +188,19 @@ export class Board extends Component {
   updateColor(row, col) {
     const squares = this.state.squares.slice();
 
-    switch(squares[row][col].value) {
-    case "*": return "crimson";
-    case 1: return AdjacentMinesTextColors.ONE;
-    case 2: return AdjacentMinesTextColors.TWO;
-    case 3: return AdjacentMinesTextColors.THREE;
-    case 4: return AdjacentMinesTextColors.FOUR;
-    default: return AdjacentMinesTextColors.OTHER;
+    switch (squares[row][col].value) {
+    case "*":
+      return "crimson";
+    case 1:
+      return AdjacentMinesTextColors.ONE;
+    case 2:
+      return AdjacentMinesTextColors.TWO;
+    case 3:
+      return AdjacentMinesTextColors.THREE;
+    case 4:
+      return AdjacentMinesTextColors.FOUR;
+    default:
+      return AdjacentMinesTextColors.OTHER;
     }
   }
 
@@ -209,7 +210,7 @@ export class Board extends Component {
     return (
       <Square
         bgColor={square.bgColor}
-        color = {square.color}
+        color={square.color}
         key={length * row + col}
         onClick={() => this.sweepSquare(row, col)}
         onContextMenu={e => this.flag(row, col)}
@@ -247,5 +248,4 @@ export class Board extends Component {
   render() {
     return this.renderBoard(this.GRIDSIZE);
   }
-  
 }
