@@ -15,8 +15,8 @@ export function Square(props) {
       style={{
         borderRadius: "1px",
         fontWeight: "bold",
-        minWidth: "50px",
-        minHeight: "50px",
+        minWidth: "55px",
+        minHeight: "55px",
         backgroundColor: props.bgColor,
         color: props.color
       }}
